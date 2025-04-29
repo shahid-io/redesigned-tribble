@@ -1,12 +1,15 @@
 const app = require('./app');
 const { ServerConfig, Logger } = require('./config');
-const { checkDatabaseConnection } = require('./common');
+const { checkDatabaseConnection, syncDatabase } = require('./common/database');
 const { initializeMailer } = require('./config/mail.config');
 
 async function startServer() {
     try {
-        // Initialize services
         await checkDatabaseConnection();
+        if (process.env.NODE_ENV === 'development') {
+            await syncDatabase();
+        }
+        
         await initializeMailer();
         
         const server = app.listen(ServerConfig.PORT, () => {
@@ -14,7 +17,6 @@ async function startServer() {
             Logger.info(`Environment: ${ServerConfig.NODE_ENV}`);
         });
 
-        // Graceful shutdown
         const shutdown = async () => {
             Logger.info('Shutting down server...');
             server.close(() => {

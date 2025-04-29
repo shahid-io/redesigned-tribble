@@ -9,16 +9,25 @@ const sequelize = new Sequelize(
     {
         host: dbConfig.host,
         port: dbConfig.port,
-        dialect: dbConfig.dialect,
-        logging: dbConfig.logging,
-        pool: dbConfig.pool,
-        dialectOptions: dbConfig.dialectOptions,
-        define: {
-            timestamps: true,
-            underscored: true
-        }
+        dialect: 'postgres',
+        logging: (msg) => Logger.debug(msg),
+        pool: dbConfig.pool
     }
 );
+
+const syncDatabase = async () => {
+    try {
+        if (process.env.NODE_ENV === 'development') {
+            await sequelize.query('SET session_replication_role = replica;'); // Disable triggers temporarily
+            await sequelize.sync({ force: true });
+            await sequelize.query('SET session_replication_role = DEFAULT;'); // Re-enable triggers
+            Logger.info('Database synced successfully');
+        }
+    } catch (error) {
+        Logger.error('Database sync failed:', error);
+        throw error;
+    }
+};
 
 const checkDatabaseConnection = async () => {
     try {
@@ -26,11 +35,12 @@ const checkDatabaseConnection = async () => {
         Logger.info('Database connection established successfully.');
     } catch (error) {
         Logger.error('Unable to connect to the database:', error);
-        process.exit(1);
+        throw error;
     }
 };
 
 module.exports = {
     sequelize,
-    checkDatabaseConnection
+    checkDatabaseConnection,
+    syncDatabase
 };

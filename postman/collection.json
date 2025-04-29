@@ -1,0 +1,46 @@
+{
+    "info": {
+        "name": "Redesigned Tribble API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Sign Up",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-user-country",
+                                "value": "US"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"Password123!\",\n    \"name\": \"Test User\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{BASE_URL}}/api/v1/auth/signup",
+                            "host": [
+                                "{{BASE_URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "signup"
+                            ]
+                        },
+                        "description": "Register a new user"
+                    }
+                }
+            ]
+        }
+    ]
+}

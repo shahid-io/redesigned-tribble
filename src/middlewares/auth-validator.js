@@ -1,4 +1,5 @@
 const { StatusCodes } = require('../types/response');
+const { Logger } = require('../config');
 
 const validateUserSignup = (req, res, next) => {
     const { email, password, name } = req.body;
@@ -52,7 +53,33 @@ const validateAuth = (req, res, next) => {
     next();
 };
 
+const validateOTP = (req, res, next) => {
+    const { userId, code } = req.body;
+
+    if (!userId || !code) {
+        Logger.warn('Missing userId or code in OTP verification request');
+        return res.status(StatusCodes.BAD_REQUEST).json({
+            success: false,
+            error: {
+                message: 'userId and code are required',
+                code: 'VAL001'
+            }
+        });
+    }
+
+    try {
+        // Convert code to string if it's a number
+        req.body.code = code.toString();
+        Logger.debug(`OTP validation passed for user: ${userId}`);
+        next();
+    } catch (error) {
+        Logger.error('Error in OTP validation:', error);
+        next(error);
+    }
+};
+
 module.exports = {
     validateUserSignup,
-    validateAuth
+    validateAuth,
+    validateOTP
 };

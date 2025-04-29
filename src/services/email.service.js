@@ -4,32 +4,56 @@ const { Logger } = require('../config');
 
 class EmailService {
     constructor() {
-        this.transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT,
-            secure: process.env.SMTP_SECURE === 'true',
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS
-            }
-        });
-
-        this.emailCache = new NodeCache({ stdTTL: 300 }); // 5 minutes cache
+        this.emailCache = new NodeCache({ stdTTL: 300 });
         this.maxRetries = 3;
+    }
+
+    async getTransporter() {
+        if (!this.transporter) {
+            if (process.env.NODE_ENV === 'development') {
+                const testAccount = await nodemailer.createTestAccount();
+                Logger.info('Test email account created:', testAccount);
+
+                this.transporter = nodemailer.createTransport({
+                    host: 'smtp.ethereal.email',
+                    port: 587,
+                    secure: false,
+                    auth: {
+                        user: testAccount.user,
+                        pass: testAccount.pass
+                    }
+                });
+            } else {
+                this.transporter = nodemailer.createTransport({
+                    host: process.env.SMTP_HOST,
+                    port: process.env.SMTP_PORT,
+                    secure: process.env.SMTP_SECURE === 'true',
+                    auth: {
+                        user: process.env.SMTP_USER,
+                        pass: process.env.SMTP_PASS
+                    }
+                });
+            }
+        }
+        return this.transporter;
     }
 
     async sendEmail(to, subject, html, retryCount = 0) {
         try {
-            const result = await this.transporter.sendMail({
-                from: process.env.SMTP_FROM,
+            const transporter = await this.getTransporter();
+            const info = await transporter.sendMail({
+                from: process.env.NODE_ENV === 'development' ? 
+                    'test@example.com' : process.env.SMTP_FROM,
                 to,
                 subject,
                 html
             });
 
-            Logger.info(`Email sent successfully to ${to}`);
-            return { success: true, data: { messageId: result.messageId } };
+            if (process.env.NODE_ENV === 'development') {
+                Logger.info('Preview URL:', nodemailer.getTestMessageUrl(info));
+            }
 
+            return { success: true, messageId: info.messageId };
         } catch (error) {
             Logger.error(`Failed to send email to ${to}:`, error);
 

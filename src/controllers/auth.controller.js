@@ -1,4 +1,4 @@
-const { StatusCodes } = require('../types/response');
+const { StatusCodes, ErrorCodes } = require('../types/response');
 const { AuthService } = require('../services');
 const { Logger } = require('../config');
 
@@ -36,8 +36,19 @@ class AuthController {
     async verifyOTP(req, res, next) {
         try {
             const { userId, code } = req.body;
-            const response = await AuthService.verifyOTP(userId, code);
             
+            // Validate code format
+            if (!code || typeof code !== 'string') {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    success: false,
+                    error: {
+                        message: 'Invalid OTP format',
+                        code: ErrorCodes.VALIDATION_ERROR
+                    }
+                });
+            }
+
+            const response = await AuthService.verifyOTP(userId, code);
             return res
                 .status(response.success ? StatusCodes.OK : StatusCodes.BAD_REQUEST)
                 .json(response);

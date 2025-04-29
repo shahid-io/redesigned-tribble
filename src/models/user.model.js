@@ -35,6 +35,10 @@ User.init({
         type: DataTypes.STRING,
         allowNull: false
     },
+    role: {
+        type: DataTypes.ENUM('admin', 'driver', 'client'),
+        defaultValue: 'client'
+    },
     country: {
         type: DataTypes.STRING,
         allowNull: false
@@ -45,10 +49,6 @@ User.init({
     },
     lastLoginAt: {
         type: DataTypes.DATE
-    },
-    role: {
-        type: DataTypes.ENUM('admin', 'driver', 'client'),
-        defaultValue: 'client'
     },
     profileImage: {
         type: DataTypes.STRING,
@@ -70,6 +70,7 @@ User.init({
     sequelize,
     modelName: 'User',
     tableName: 'users',
+    underscored: false, // Change to false to use camelCase
     hooks: {
         beforeCreate: async (user) => {
             if (user.password) {

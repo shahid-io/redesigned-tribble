@@ -25,6 +25,14 @@ module.exports = {
         type: Sequelize.ENUM('admin', 'driver', 'client'),
         defaultValue: 'client'
       },
+      status: {
+        type: Sequelize.ENUM('active', 'inactive', 'suspended'),
+        defaultValue: 'active'
+      },
+      earnings: {
+        type: Sequelize.DECIMAL(10, 2),
+        defaultValue: 0
+      },
       country: {
         type: Sequelize.STRING,
         allowNull: false
@@ -36,6 +44,14 @@ module.exports = {
       lastLoginAt: {
         type: Sequelize.DATE
       },
+      profileImage: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      phoneNumber: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false
@@ -46,7 +62,6 @@ module.exports = {
       }
     });
   },
-
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable('users');
   }
