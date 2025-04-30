@@ -19,11 +19,45 @@ class AuthController {
         }
     }
 
+    async resendOTP(req, res, next) {
+        try {
+            const { userId } = req.body;
+            
+            if (!userId) {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    success: false,
+                    error: {
+                        message: 'userId is required',
+                        code: ErrorCodes.VALIDATION_ERROR
+                    }
+                });
+            }
+
+            const response = await AuthService.resendOTP(userId);
+            return res
+                .status(response.success ? StatusCodes.OK : StatusCodes.BAD_REQUEST)
+                .json(response);
+        } catch (error) {
+            Logger.error('Error in resending OTP:', error);
+            next(error);
+        }
+    }
+
     async login(req, res, next) {
         try {
             const { email, password } = req.body;
-            const response = await AuthService.login(email, password);
             
+            if (!email || !password) {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    success: false,
+                    error: {
+                        message: 'Email and password are required',
+                        code: ErrorCodes.VALIDATION_ERROR
+                    }
+                });
+            }
+
+            const response = await AuthService.login(email, password);
             return res
                 .status(response.success ? StatusCodes.OK : StatusCodes.UNAUTHORIZED)
                 .json(response);
@@ -54,20 +88,6 @@ class AuthController {
                 .json(response);
         } catch (error) {
             Logger.error('Error in OTP verification:', error);
-            next(error);
-        }
-    }
-
-    async resendOTP(req, res, next) {
-        try {
-            const { userId } = req.body;
-            const response = await AuthService.resendOTP(userId);
-            
-            return res
-                .status(response.success ? StatusCodes.OK : StatusCodes.BAD_REQUEST)
-                .json(response);
-        } catch (error) {
-            Logger.error('Error in resending OTP:', error);
             next(error);
         }
     }

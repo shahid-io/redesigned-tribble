@@ -4,7 +4,7 @@ const { User, OTP } = require('../models');
 const { ServerConfig, Logger } = require('../config');
 const { AUTH_ERRORS, OTP_CONFIG, RESTRICTED_COUNTRIES } = require('../constants/auth.constants');
 const { ErrorCodes } = require('../types/response');
-const emailService = require('./email.service');
+const { sendMail } = require('../config/mail.config');
 const { Op } = require('sequelize');
 
 class AuthService {
@@ -38,61 +38,105 @@ class AuthService {
 
             const otp = await this.generateOTP(user.id);
             
-            // Development mode: Return OTP in response
-            if (process.env.NODE_ENV === 'development') {
+            // Send OTP email
+            const emailResult = await this.sendVerificationEmail(user.email, otp.code);
+            
+            if (!emailResult.success) {
+                Logger.error('Failed to send verification email:', emailResult.error);
+                // You might want to delete the user and return an error
+                await user.destroy();
                 return {
-                    success: true,
-                    data: { 
-                        message: 'Registration successful. Use the OTP to verify your account.',
-                        userId: user.id,
-                        otp: otp.code, // Only included in development
-                        email: user.email
+                    success: false,
+                    error: {
+                        message: 'Failed to send verification email',
+                        code: ErrorCodes.SERVER_ERROR,
+                        details: emailResult.error
                     }
                 };
             }
 
-            // Production mode
-            return {
+            const response = {
                 success: true,
                 data: { 
-                    message: 'Registration successful. Please check your email for OTP.',
+                    message: 'Registration successful. Please check your email for verification code.',
                     userId: user.id
                 }
             };
+
+            if (process.env.NODE_ENV === 'development') {
+                response.data.otp = otp.code;
+                response.data.emailPreview = emailResult.previewURL;
+            }
+
+            return response;
         } catch (error) {
             Logger.error('Registration error:', error);
             throw error;
         }
     }
 
+    async sendVerificationEmail(email, otp) {
+        const subject = 'Verify Your Email';
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2>Email Verification</h2>
+                <p>Your verification code is:</p>
+                <h1 style="font-size: 32px; letter-spacing: 5px; background: #f4f4f4; padding: 10px; text-align: center;">${otp}</h1>
+                <p>This code will expire in ${process.env.OTP_EXPIRY || 10} minutes.</p>
+            </div>
+        `;
+
+        Logger.info(`Sending verification email to: ${email}`);
+        return await sendMail(email, subject, html);
+    }
+
     async resendOTP(userId) {
-        const user = await User.findByPk(userId);
-        if (!user) {
+        try {
+            const user = await User.findByPk(userId);
+            if (!user) {
+                return {
+                    success: false,
+                    error: {
+                        message: AUTH_ERRORS.UNVERIFIED_USER,
+                        code: ErrorCodes.UNAUTHORIZED
+                    }
+                };
+            }
+
+            // Generate new OTP
+            const otp = await this.generateOTP(user.id);
+            
+            // Send new verification email
+            const emailResult = await this.sendVerificationEmail(user.email, otp.code);
+            
+            if (!emailResult.success) {
+                Logger.error('Failed to send verification email:', emailResult.error);
+                return {
+                    success: false,
+                    error: {
+                        message: 'Failed to send verification email',
+                        code: ErrorCodes.SERVER_ERROR
+                    }
+                };
+            }
+
             return {
-                success: false,
-                error: {
-                    message: AUTH_ERRORS.UNVERIFIED_USER,
-                    code: ErrorCodes.UNAUTHORIZED
+                success: true,
+                data: { 
+                    message: 'OTP sent successfully',
+                    userId: user.id,
+                    ...(process.env.NODE_ENV === 'development' && { otp: otp.code })
                 }
             };
+        } catch (error) {
+            Logger.error('Resend OTP error:', error);
+            throw error;
         }
-
-        const token = jwt.sign(
-            { id: user.id, email: user.email },
-            ServerConfig.JWT_SECRET,
-            { expiresIn: ServerConfig.JWT_EXPIRY }
-        );
-
-        return {
-            success: true,
-            data: { token, user: this.sanitizeUser(user) }
-        };
     }
 
     async verifyOTP(userId, code) {
         try {
-            Logger.info(`Verifying OTP for user: ${userId} with code: ${code}`);
-            
+            Logger.info(`Verifying OTP for user: ${userId} with code: ${code}`); 
             const otp = await OTP.findOne({
                 where: {
                     userId,
@@ -171,14 +215,7 @@ class AuthService {
 
     async login(email, password) {
         try {
-            const user = await User.findOne({ 
-                where: { 
-                    email,
-                    status: 'active'
-                } 
-            });
-
-            if (!user) {
+            if (!email || !password) {
                 return {
                     success: false,
                     error: {
@@ -188,13 +225,28 @@ class AuthService {
                 };
             }
 
-            const isPasswordValid = await user.validatePassword(password);
-            if (!isPasswordValid) {
+            const user = await User.findOne({ 
+                where: { email }
+            });
+
+            if (!user || !await user.validatePassword(password)) {
                 return {
                     success: false,
                     error: {
                         message: AUTH_ERRORS.INVALID_CREDENTIALS,
                         code: ErrorCodes.UNAUTHORIZED
+                    }
+                };
+            }
+
+            // Check if user is verified
+            if (!user.isVerified) {
+                return {
+                    success: false,
+                    error: {
+                        message: AUTH_ERRORS.UNVERIFIED_USER,
+                        code: ErrorCodes.UNAUTHORIZED,
+                        userId: user.id // Include userId for frontend to handle verification
                     }
                 };
             }
