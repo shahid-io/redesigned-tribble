@@ -1,11 +1,13 @@
 const express = require('express');
-const { AuthController } = require('../../controllers/index');
+const { AuthController } = require('../../controllers');
 const { validateUserSignup, validateAuth, validateOTP } = require('../../middlewares/auth-validator');
+const { countryRestrictionMiddleware } = require('../../middlewares');
 
 const router = express.Router();
 
 router.post(
     '/signup',
+    countryRestrictionMiddleware,
     validateUserSignup,
     AuthController.signup
 );

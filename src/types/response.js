@@ -1,21 +1,29 @@
 /**
  * @enum {string}
  */
-export const ErrorCodes = {
-  UNAUTHORIZED: 'AUTH001',
-  INVALID_CREDENTIALS: 'AUTH002',
-  REGISTRATION_FAILED: 'AUTH003',
-  RESTRICTED_LOCATION: 'AUTH004',
-  INVALID_OTP: 'AUTH005',
-  USER_EXISTS: 'AUTH006',
-  VALIDATION_ERROR: 'VAL001',
-  SERVER_ERROR: 'SRV001'
+const ErrorCodes = {
+  // Auth related errors
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
+  REGISTRATION_FAILED: 'REGISTRATION_FAILED',
+  RESTRICTED_LOCATION: 'RESTRICTED_LOCATION',
+  INVALID_OTP: 'INVALID_OTP',
+  USER_EXISTS: 'USER_ALREADY_EXISTS',
+  
+  // Validation related errors
+  MISSING_REQUIRED_FIELDS: 'MISSING_REQUIRED_FIELDS',
+  INVALID_EMAIL_FORMAT: 'INVALID_EMAIL_FORMAT',
+  INVALID_PASSWORD_FORMAT: 'INVALID_PASSWORD_FORMAT',
+  INVALID_INPUT: 'INVALID_INPUT',
+  
+  // Server related errors
+  SERVER_ERROR: 'INTERNAL_SERVER_ERROR'
 };
 
 /**
  * @enum {number}
  */
-export const StatusCodes = {
+const StatusCodes = {
   OK: 200,
   CREATED: 201,
   BAD_REQUEST: 400,
@@ -47,7 +55,7 @@ export const StatusCodes = {
  * @param {T} data 
  * @returns {AppSuccess<T>}
  */
-export const createSuccess = (data) => ({
+const createSuccess = (data) => ({
   success: true,
   data,
 });
@@ -58,7 +66,7 @@ export const createSuccess = (data) => ({
  * @param {*} [details] 
  * @returns {AppError}
  */
-export const createError = (message, code, details) => ({
+const createError = (message, code, details) => ({
   success: false,
   error: {
     message,
@@ -78,3 +86,11 @@ export const createError = (message, code, details) => ({
  * @property {string} field
  * @property {string} message
  */
+
+// Change exports from ES6 to CommonJS
+module.exports = {
+  ErrorCodes,
+  StatusCodes,
+  createSuccess,
+  createError
+};

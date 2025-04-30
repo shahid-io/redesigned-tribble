@@ -3,6 +3,14 @@ const { AuthService } = require('../services');
 const { Logger } = require('../config');
 
 class AuthController {
+    constructor() {
+        // Bind all methods to this instance
+        this.signup = this.signup.bind(this);
+        this.login = this.login.bind(this);
+        this.verifyOTP = this.verifyOTP.bind(this);
+        this.resendOTP = this.resendOTP.bind(this);
+    }
+
     async signup(req, res, next) {
         try {
             const { email, password, name } = req.body;
@@ -93,4 +101,5 @@ class AuthController {
     }
 }
 
+// Export a new instance
 module.exports = new AuthController();

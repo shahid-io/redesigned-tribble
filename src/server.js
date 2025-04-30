@@ -1,7 +1,7 @@
 const app = require('./app');
 const { ServerConfig, Logger } = require('./config');
 const { checkDatabaseConnection, syncDatabase } = require('./common/database');
-const { initializeMailer } = require('./config/mail.config');
+const { initializeMailer } = require('./config/mail-config');
 
 async function startServer() {
     try {

@@ -4,7 +4,7 @@ const { User, OTP } = require('../models');
 const { ServerConfig, Logger } = require('../config');
 const { AUTH_ERRORS, OTP_CONFIG, RESTRICTED_COUNTRIES } = require('../constants/auth.constants');
 const { ErrorCodes } = require('../types/response');
-const { sendMail } = require('../config/mail.config');
+const { sendMail } = require('../config/mail-config');
 const { Op } = require('sequelize');
 
 class AuthService {

@@ -1,4 +1,4 @@
-const { StatusCodes } = require('../types/response');
+const { StatusCodes, ErrorCodes } = require('../types/response');
 const { Logger } = require('../config');
 
 const validateUserSignup = (req, res, next) => {
@@ -8,8 +8,8 @@ const validateUserSignup = (req, res, next) => {
         return res.status(StatusCodes.BAD_REQUEST).json({
             success: false,
             error: {
-                message: 'Missing required fields',
-                code: 'VAL001'
+                message: 'Missing required fields: email, password, and name are required',
+                code: ErrorCodes.MISSING_REQUIRED_FIELDS
             }
         });
     }
@@ -18,8 +18,8 @@ const validateUserSignup = (req, res, next) => {
         return res.status(StatusCodes.BAD_REQUEST).json({
             success: false,
             error: {
-                message: 'Invalid email format',
-                code: 'VAL002'
+                message: 'Please provide a valid email address',
+                code: ErrorCodes.INVALID_EMAIL_FORMAT
             }
         });
     }
@@ -29,7 +29,7 @@ const validateUserSignup = (req, res, next) => {
             success: false,
             error: {
                 message: 'Password must be at least 6 characters long',
-                code: 'VAL003'
+                code: ErrorCodes.INVALID_PASSWORD_FORMAT
             }
         });
     }
@@ -44,8 +44,8 @@ const validateAuth = (req, res, next) => {
         return res.status(StatusCodes.BAD_REQUEST).json({
             success: false,
             error: {
-                message: 'Email and password are required',
-                code: 'VAL004'
+                message: 'Both email and password are required',
+                code: ErrorCodes.MISSING_REQUIRED_FIELDS
             }
         });
     }
@@ -61,14 +61,13 @@ const validateOTP = (req, res, next) => {
         return res.status(StatusCodes.BAD_REQUEST).json({
             success: false,
             error: {
-                message: 'userId and code are required',
-                code: 'VAL001'
+                message: 'User ID and verification code are required',
+                code: ErrorCodes.MISSING_REQUIRED_FIELDS
             }
         });
     }
 
     try {
-        // Convert code to string if it's a number
         req.body.code = code.toString();
         Logger.debug(`OTP validation passed for user: ${userId}`);
         next();
