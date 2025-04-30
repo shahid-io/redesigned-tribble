@@ -26,8 +26,6 @@ const isCountryRestricted = (countryCode) => {
     return false;
   }
 };
-
-// Initialize and log countries
 Logger.info('Initialized restricted countries:', Object.entries(RESTRICTED_COUNTRIES)
   .map(([code, name]) => `${code}: ${name}`)
   .join(', ')

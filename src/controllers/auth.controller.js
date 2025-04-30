@@ -3,20 +3,29 @@ const { AuthService } = require('../services');
 const { Logger } = require('../config');
 
 class AuthController {
-    constructor() {
-        // Bind all methods to this instance
-        this.signup = this.signup.bind(this);
-        this.login = this.login.bind(this);
-        this.verifyOTP = this.verifyOTP.bind(this);
-        this.resendOTP = this.resendOTP.bind(this);
-    }
+    constructor() {}
 
     async signup(req, res, next) {
         try {
             const { email, password, name } = req.body;
-            const userCountry = req.headers['x-user-country'] || 'UNKNOWN';
             
-            const response = await AuthService.register({ email, password, name }, userCountry);
+            // Use geoData from middleware instead of headers
+            if (!req.geoData || !req.geoData.countryCode) {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    success: false,
+                    error: {
+                        message: 'Unable to determine your location',
+                        code: ErrorCodes.VALIDATION_ERROR
+                    }
+                });
+            }
+
+            Logger.info(`Processing signup request from ${req.geoData.country} (${req.geoData.countryCode})`);
+            
+            const response = await AuthService.register(
+                { email, password, name },
+                req.geoData.countryCode
+            );
             
             return res
                 .status(response.success ? StatusCodes.CREATED : StatusCodes.BAD_REQUEST)
@@ -79,7 +88,6 @@ class AuthController {
         try {
             const { userId, code } = req.body;
             
-            // Validate code format
             if (!code || typeof code !== 'string') {
                 return res.status(StatusCodes.BAD_REQUEST).json({
                     success: false,
@@ -101,5 +109,4 @@ class AuthController {
     }
 }
 
-// Export a new instance
 module.exports = new AuthController();
