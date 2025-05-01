@@ -1,10 +1,15 @@
 const errorHandler = require('./error-handler');
-const { validateUserSignup, validateAuth } = require('./auth-validator');
+const { validateUserSignup, validateAuth, validateOTP } = require('./auth-validator');
+const { validateProfileUpdate } = require('./user-validator');
 const countryRestrictionMiddleware = require('./country-restriction-middleware');
+const authMiddleware = require('./auth-middleware');
 
 module.exports = {
     errorHandler,
     validateUserSignup,
     validateAuth,
-    countryRestrictionMiddleware
+    validateOTP,
+    validateProfileUpdate,
+    countryRestrictionMiddleware,
+    authMiddleware
 };

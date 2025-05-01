@@ -88,17 +88,17 @@ class AuthController {
         try {
             const { userId, code } = req.body;
             
-            if (!code || typeof code !== 'string') {
+            if (!code) {
                 return res.status(StatusCodes.BAD_REQUEST).json({
                     success: false,
                     error: {
-                        message: 'Invalid OTP format',
+                        message: 'OTP code is required',
                         code: ErrorCodes.VALIDATION_ERROR
                     }
                 });
             }
 
-            const response = await AuthService.verifyOTP(userId, code);
+            const response = await AuthService.verifyOTP(userId, code.toString());
             return res
                 .status(response.success ? StatusCodes.OK : StatusCodes.BAD_REQUEST)
                 .json(response);

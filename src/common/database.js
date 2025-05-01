@@ -18,9 +18,10 @@ const sequelize = new Sequelize(
 const syncDatabase = async () => {
     try {
         if (process.env.NODE_ENV === 'development') {
-            await sequelize.query('SET session_replication_role = replica;'); // Disable triggers temporarily
-            await sequelize.sync({ force: true });
-            await sequelize.query('SET session_replication_role = DEFAULT;'); // Re-enable triggers
+            await sequelize.query('SET session_replication_role = replica;');
+            // await sequelize.sync({ force: true });
+              await sequelize.sync({ alter: true });
+            await sequelize.query('SET session_replication_role = DEFAULT;');
             Logger.info('Database synced successfully');
         }
     } catch (error) {

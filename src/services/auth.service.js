@@ -239,19 +239,17 @@ class AuthService {
                 };
             }
 
-            // Check if user is verified
             if (!user.isVerified) {
                 return {
                     success: false,
                     error: {
                         message: AUTH_ERRORS.UNVERIFIED_USER,
                         code: ErrorCodes.UNAUTHORIZED,
-                        userId: user.id // Include userId for frontend to handle verification
+                        userId: user.id 
                     }
                 };
             }
 
-            // Update last login time
             await user.update({ lastLoginAt: new Date() });
 
             const token = jwt.sign(
