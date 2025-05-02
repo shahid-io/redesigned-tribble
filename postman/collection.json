@@ -247,6 +247,117 @@
                     "response": []
                 }
             ]
+        },
+        {
+            "name": "Products",
+            "item": [
+                {
+                    "name": "Create Product",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Premium Ride\",\n    \"type\": \"elite\",\n    \"basePrice\": 99.99,\n    \"description\": \"Luxury transportation service\",\n    \"features\": {\n        \"maxDistance\": 100,\n        \"priority\": true,\n        \"extras\": [\"wifi\", \"refreshments\"]\n    }\n}"
+                        },
+                        "url": {
+                            "raw": "{{BASE_URL}}/api/v1/products",
+                            "host": ["{{BASE_URL}}"],
+                            "path": ["api", "v1", "products"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Products",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{BASE_URL}}/api/v1/products",
+                            "host": ["{{BASE_URL}}"],
+                            "path": ["api", "v1", "products"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Product by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{BASE_URL}}/api/v1/products/{{productId}}",
+                            "host": ["{{BASE_URL}}"],
+                            "path": ["api", "v1", "products", "{{productId}}"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Product",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Updated Premium Ride\",\n    \"basePrice\": 149.99,\n    \"description\": \"Updated luxury service\",\n    \"features\": {\n        \"maxDistance\": 150,\n        \"priority\": true,\n        \"extras\": [\"wifi\", \"refreshments\", \"concierge\"]\n    }\n}"
+                        },
+                        "url": {
+                            "raw": "{{BASE_URL}}/api/v1/products/{{productId}}",
+                            "host": ["{{BASE_URL}}"],
+                            "path": ["api", "v1", "products", "{{productId}}"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Product",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{BASE_URL}}/api/v1/products/{{productId}}",
+                            "host": ["{{BASE_URL}}"],
+                            "path": ["api", "v1", "products", "{{productId}}"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
         }
     ]
 }

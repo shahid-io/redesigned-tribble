@@ -3,6 +3,7 @@ const { validateUserSignup, validateAuth, validateOTP } = require('./auth-valida
 const { validateProfileUpdate } = require('./user-validator');
 const countryRestrictionMiddleware = require('./country-restriction-middleware');
 const authMiddleware = require('./auth-middleware');
+const { validateProduct } = require('./product-validator');
 
 module.exports = {
     errorHandler,
@@ -11,5 +12,6 @@ module.exports = {
     validateOTP,
     validateProfileUpdate,
     countryRestrictionMiddleware,
-    authMiddleware
+    authMiddleware,
+    validateProduct
 };

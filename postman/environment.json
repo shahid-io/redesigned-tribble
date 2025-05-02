@@ -25,6 +25,12 @@
             "value": "",
             "type": "secret",
             "enabled": true
+        },
+        {
+            "key": "productId",
+            "value": "",
+            "type": "default",
+            "enabled": true
         }
     ]
 }
