@@ -1,8 +1,22 @@
 const { Model, DataTypes } = require('sequelize');
 const { sequelize } = require('../common/database');
 
+/**
+ * Product Model
+ * Represents available service products in the system
+ */
 class Product extends Model {}
 
+/**
+ * Product model definition
+ * @property {UUID} id - Unique identifier for the product
+ * @property {string} name - Product name
+ * @property {enum} type - Product type: 'simple', 'comfortable', or 'elite'
+ * @property {decimal} basePrice - Base price for the product
+ * @property {string} description - Product description
+ * @property {Object} features - JSON object containing product features
+ * @property {boolean} isActive - Product availability status
+ */
 Product.init({
     id: {
         type: DataTypes.UUID,

@@ -1,10 +1,43 @@
+/**
+ * Authentication Controller
+ * @module AuthController
+ * @description Handles all authentication-related HTTP requests
+ * 
+ * @requires StatusCodes - HTTP status codes enum
+ * @requires ErrorCodes - Application error codes
+ * @requires AuthService - Authentication business logic
+ * @requires Logger - Application logging utility
+ */
 const { StatusCodes, ErrorCodes } = require('../types/response');
 const { AuthService } = require('../services');
 const { Logger } = require('../config');
 
+/**
+ * @class AuthController
+ * @description Controller for handling authentication operations
+ * 
+ * Features:
+ * - User registration with geo-restriction
+ * - OTP verification system
+ * - User login with JWT
+ * - OTP resend functionality
+ */
 class AuthController {
-    constructor() {}
-
+    /**
+     * @method signup
+     * @description Register new user with geo-restriction check
+     * 
+     * @param {Request} req - Express request object
+     * @param {Object} req.body - Request body
+     * @param {string} req.body.email - User's email
+     * @param {string} req.body.password - User's password
+     * @param {string} req.body.name - User's name
+     * @param {Object} req.geoData - Geo-location data from middleware
+     * 
+     * @param {Response} res - Express response object
+     * @param {NextFunction} next - Express next middleware
+     * @returns {Promise<Response>} JSON response
+     */
     async signup(req, res, next) {
         try {
             const { email, password, name } = req.body;
@@ -36,6 +69,18 @@ class AuthController {
         }
     }
 
+    /**
+     * @method resendOTP
+     * @description Resend OTP to user's email
+     * 
+     * @param {Request} req - Express request object
+     * @param {Object} req.body - Request body
+     * @param {string} req.body.userId - User's ID
+     * 
+     * @param {Response} res - Express response object
+     * @param {NextFunction} next - Express next middleware
+     * @returns {Promise<Response>} JSON response
+     */
     async resendOTP(req, res, next) {
         try {
             const { userId } = req.body;
@@ -60,6 +105,19 @@ class AuthController {
         }
     }
 
+    /**
+     * @method login
+     * @description Authenticate user and generate JWT
+     * 
+     * @param {Request} req - Express request object
+     * @param {Object} req.body - Request body
+     * @param {string} req.body.email - User's email
+     * @param {string} req.body.password - User's password
+     * 
+     * @param {Response} res - Express response object
+     * @param {NextFunction} next - Express next middleware
+     * @returns {Promise<Response>} JSON response with JWT
+     */
     async login(req, res, next) {
         try {
             const { email, password } = req.body;
@@ -84,6 +142,19 @@ class AuthController {
         }
     }
 
+    /**
+     * @method verifyOTP
+     * @description Verify OTP code and activate user account
+     * 
+     * @param {Request} req - Express request object
+     * @param {Object} req.body - Request body
+     * @param {string} req.body.userId - User's ID
+     * @param {string} req.body.code - OTP code
+     * 
+     * @param {Response} res - Express response object
+     * @param {NextFunction} next - Express next middleware
+     * @returns {Promise<Response>} JSON response
+     */
     async verifyOTP(req, res, next) {
         try {
             const { userId, code } = req.body;
@@ -109,4 +180,5 @@ class AuthController {
     }
 }
 
+// Export singleton instance
 module.exports = new AuthController();

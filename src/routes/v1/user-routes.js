@@ -2,6 +2,15 @@ const express = require('express');
 const { UserController } = require('../../controllers');
 const { authMiddleware, validateProfileUpdate } = require('../../middlewares');
 
+/**
+ * User Routes
+ * @module UserRoutes
+ * 
+ * GET /profile - Get user profile
+ * PUT /profile - Update user profile
+ * PUT /password - Change user password
+ * DELETE /account - Delete user account
+ */
 const router = express.Router();
 
 router.get('/profile', authMiddleware, UserController.getProfile);

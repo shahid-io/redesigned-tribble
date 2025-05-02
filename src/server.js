@@ -1,8 +1,41 @@
+/**
+ * Server Entry Point
+ * @module Server
+ * @description Initializes and manages the Express application server
+ * 
+ * Features:
+ * - Database connection verification
+ * - Schema synchronization
+ * - Email service initialization
+ * - Graceful shutdown handling
+ * 
+ * @requires app - Express application instance
+ * @requires ServerConfig - Server configuration
+ * @requires Logger - Application logging
+ * @requires database - Database utilities
+ * @requires mail-config - Email service configuration
+ */
 const app = require('./app');
 const { ServerConfig, Logger } = require('./config');
 const { checkDatabaseConnection, syncDatabase } = require('./common/database');
 const { initializeMailer } = require('./config/mail-config');
 
+/**
+ * Initialize and Start Server
+ * @description Performs necessary startup checks and initializations
+ * 
+ * Startup Sequence:
+ * 1. Verify database connection
+ * 2. Sync database schema (development only)
+ * 3. Initialize email service
+ * 4. Start HTTP server
+ * 5. Setup shutdown handlers
+ * 
+ * @async
+ * @function startServer
+ * @throws {Error} If critical services fail to initialize
+ * @returns {Promise<void>}
+ */
 async function startServer() {
     try {
         await checkDatabaseConnection();
@@ -34,4 +67,8 @@ async function startServer() {
     }
 }
 
+/**
+ * Bootstrap Application
+ * @description Initiates the server startup sequence
+ */
 startServer();

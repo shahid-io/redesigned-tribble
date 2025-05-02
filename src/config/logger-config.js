@@ -1,5 +1,19 @@
 const winston = require('winston');
 
+/**
+ * Winston Logger Configuration
+ * Configures logging for different environments with file and console transport
+ * 
+ * @module LoggerConfig
+ */
+
+/**
+ * Create Winston logger instance with:
+ * - Console logging for all environments
+ * - File logging for errors
+ * - Combined logging file for all levels
+ * - Timestamp and color formatting
+ */
 const Logger = winston.createLogger({
     level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
     format: winston.format.combine(

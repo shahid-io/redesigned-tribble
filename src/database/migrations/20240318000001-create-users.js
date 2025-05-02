@@ -1,5 +1,12 @@
 'use strict';
 
+/**
+ * Users Table Migration
+ * Creates the initial users table structure
+ * 
+ * @param {import('sequelize').QueryInterface} queryInterface
+ * @param {import('sequelize')} Sequelize
+ */
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('users', {

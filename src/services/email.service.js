@@ -1,16 +1,65 @@
+/**
+ * Required dependencies
+ * - nodemailer: For sending emails
+ * - node-cache: For rate limiting and caching
+ * - Logger: For application logging
+ */
 const nodemailer = require('nodemailer');
 const NodeCache = require('node-cache');
 const { Logger } = require('../config');
 
+/**
+ * @class EmailService
+ * @description Handles all email-related operations including:
+ * - OTP delivery for user verification
+ * - Rate limiting for email sends
+ * - Retry mechanism for failed attempts
+ * - Development/Production environment handling
+ * 
+ * @example
+ * const emailService = new EmailService();
+ * await emailService.sendOTPEmail('user@example.com', '123456');
+ */
 class EmailService {
+    /**
+     * Creates an instance of EmailService
+     * 
+     * @constructor
+     * @description Initializes:
+     * - Email cache for rate limiting (5 minutes TTL)
+     * - Maximum retry attempts for failed sends
+     * - Transporter instance (lazy loaded)
+     */
     constructor() {
-        this.emailCache = new NodeCache({ stdTTL: 300 });
-        this.maxRetries = 3;
+        this.emailCache = new NodeCache({ stdTTL: 300 }); // 5 minutes cache
+        this.maxRetries = 3; // Maximum retry attempts
     }
 
+    /**
+     * Creates or returns existing nodemailer transporter
+     * 
+     * @description
+     * In development:
+     * - Creates ethereal test account
+     * - Uses ethereal SMTP server
+     * - Provides preview URLs for sent emails
+     * 
+     * In production:
+     * - Uses configured SMTP settings
+     * - Requires following environment variables:
+     *   - SMTP_HOST: SMTP server hostname
+     *   - SMTP_PORT: SMTP server port
+     *   - SMTP_SECURE: Use TLS if true
+     *   - SMTP_USER: SMTP authentication username
+     *   - SMTP_PASS: SMTP authentication password
+     * 
+     * @returns {Promise<Mail>} Configured nodemailer transporter
+     * @throws {Error} If SMTP configuration is invalid
+     */
     async getTransporter() {
         if (!this.transporter) {
             if (process.env.NODE_ENV === 'development') {
+                // Development environment setup
                 const testAccount = await nodemailer.createTestAccount();
                 Logger.info('Test email account created:', testAccount);
 
@@ -24,6 +73,7 @@ class EmailService {
                     }
                 });
             } else {
+                // Production environment setup
                 this.transporter = nodemailer.createTransport({
                     host: process.env.SMTP_HOST,
                     port: process.env.SMTP_PORT,
@@ -38,6 +88,20 @@ class EmailService {
         return this.transporter;
     }
 
+    /**
+     * Send email with retry mechanism
+     * 
+     * @description
+     * Attempts to send an email using nodemailer transporter.
+     * Implements retry mechanism with exponential backoff for failed attempts.
+     * Logs preview URL in development mode.
+     * 
+     * @param {string} to - Recipient email
+     * @param {string} subject - Email subject
+     * @param {string} html - Email HTML content
+     * @param {number} [retryCount=0] - Current retry attempt
+     * @returns {Promise<Object>} Send result
+     */
     async sendEmail(to, subject, html, retryCount = 0) {
         try {
             const transporter = await this.getTransporter();
@@ -79,11 +143,43 @@ class EmailService {
         }
     }
 
+    /**
+     * Implements exponential backoff for retries
+     * 
+     * @description
+     * Calculates delay using exponential backoff formula:
+     * delay = min(2^retryCount * 1000ms, 10000ms)
+     * 
+     * Retry delays:
+     * - 1st retry: 1000ms (1s)
+     * - 2nd retry: 2000ms (2s)
+     * - 3rd retry: 4000ms (4s)
+     * - Maximum delay cap: 10000ms (10s)
+     * 
+     * @param {number} retryCount - Current retry attempt number
+     * @returns {number} Delay in milliseconds before next retry
+     */
     calculateBackoff(retryCount) {
-        // Exponential backoff: 2^retryCount * 1000ms (1s, 2s, 4s)
         return Math.min(Math.pow(2, retryCount) * 1000, 10000);
     }
 
+    /**
+     * Sends OTP verification email with rate limiting
+     * 
+     * @description
+     * - Generates HTML email using template
+     * - Implements rate limiting using cache
+     * - Prevents spam by enforcing cooldown
+     * - Updates cache on successful send
+     * 
+     * Rate limiting:
+     * - Cache key format: `otp_${email}`
+     * - TTL: 5 minutes (configured in constructor)
+     * 
+     * @param {string} email - Recipient's email address
+     * @param {string} otp - Generated OTP code
+     * @returns {Promise<Object>} Send result with success/error status
+     */
     async sendOTPEmail(email, otp) {
         const subject = 'Your Verification Code';
         const html = this.getOTPEmailTemplate(otp);
@@ -107,6 +203,21 @@ class EmailService {
         return result;
     }
 
+    /**
+     * Generates HTML template for OTP emails
+     * 
+     * @description
+     * Creates responsive HTML email template with:
+     * - Arial font for better compatibility
+     * - Max width constraint for readability
+     * - Centered layout
+     * - Large, spaced OTP display
+     * - Expiry time information
+     * - Security disclaimer
+     * 
+     * @param {string} otp - OTP code to include in template
+     * @returns {string} HTML email template
+     */
     getOTPEmailTemplate(otp) {
         return `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -120,4 +231,5 @@ class EmailService {
     }
 }
 
+// Export singleton instance
 module.exports = new EmailService();

@@ -3,6 +3,17 @@ const { StatusCodes, ErrorCodes, createError } = require('../types/response');
 const { ServerConfig, Logger } = require('../config');
 const { User } = require('../models');
 
+/**
+ * Authentication Middleware
+ * Validates JWT tokens and manages user authentication state
+ * 
+ * @middleware
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {void}
+ * @throws {Error} When authentication fails
+ */
 const authMiddleware = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;

@@ -1,7 +1,15 @@
 const { Model, DataTypes } = require('sequelize');
 const { sequelize } = require('../common/database');
 
+/**
+ * Order Model
+ * Represents a ride/delivery order in the system
+ */
 class Order extends Model {
+    /**
+     * Define model associations
+     * @param {Object} models - Available models
+     */
     static associate(models) {
         Order.belongsTo(models.User, { foreignKey: 'userId', as: 'customer' });
         Order.belongsTo(models.User, { foreignKey: 'driverId', as: 'driver' });
@@ -9,6 +17,18 @@ class Order extends Model {
     }
 }
 
+/**
+ * Order model definition
+ * @property {UUID} id - Unique identifier for the order
+ * @property {UUID} userId - Customer who placed the order
+ * @property {UUID} driverId - Driver assigned to the order
+ * @property {UUID} productId - Selected service/product
+ * @property {string} startLocation - Pickup location
+ * @property {string} finishLocation - Drop-off location
+ * @property {decimal} amount - Order amount
+ * @property {enum} status - Order status
+ * @property {Date} orderedTime - Order placement time
+ */
 Order.init({
     id: {
         type: DataTypes.UUID,

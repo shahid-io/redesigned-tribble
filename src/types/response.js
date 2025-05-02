@@ -1,4 +1,6 @@
 /**
+ * Application Error Codes
+ * Defines all possible error codes returned by the API
  * @enum {string}
  */
 const ErrorCodes = {
@@ -21,6 +23,8 @@ const ErrorCodes = {
 };
 
 /**
+ * HTTP Status Codes
+ * Defines all HTTP status codes used by the API
  * @enum {number}
  */
 const StatusCodes = {
@@ -51,9 +55,10 @@ const StatusCodes = {
  */
 
 /**
+ * Create a success response object
  * @template T
- * @param {T} data 
- * @returns {AppSuccess<T>}
+ * @param {T} data - The data to be returned
+ * @returns {AppSuccess<T>} Success response object
  */
 const createSuccess = (data) => ({
   success: true,
@@ -61,10 +66,11 @@ const createSuccess = (data) => ({
 });
 
 /**
- * @param {string} message 
- * @param {ErrorCodes} code 
- * @param {*} [details] 
- * @returns {AppError}
+ * Create an error response object
+ * @param {string} message - Error message
+ * @param {ErrorCodes} code - Error code
+ * @param {*} [details] - Additional error details
+ * @returns {AppError} Error response object
  */
 const createError = (message, code, details) => ({
   success: false,

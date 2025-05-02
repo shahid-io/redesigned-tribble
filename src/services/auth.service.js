@@ -7,7 +7,17 @@ const { ErrorCodes } = require('../types/response');
 const { sendMail } = require('../config/mail-config');
 const { Op } = require('sequelize');
 
+/**
+ * Authentication Service
+ * Handles user registration, login, and email verification
+ */
 class AuthService {
+    /**
+     * Register a new user
+     * @param {Object} userData - User registration data
+     * @param {string} userCountry - User's country code
+     * @returns {Promise<Object>} Registration result
+     */
     async register(userData, userCountry) {
         try {
             if (RESTRICTED_COUNTRIES.includes(userCountry)) {
@@ -75,6 +85,12 @@ class AuthService {
         }
     }
 
+    /**
+     * Send verification email to user
+     * @param {string} email - User's email address
+     * @param {string} otp - Generated OTP code
+     * @returns {Promise<Object>} Email sending result
+     */
     async sendVerificationEmail(email, otp) {
         const subject = 'Verify Your Email';
         const html = `
@@ -90,6 +106,11 @@ class AuthService {
         return await sendMail(email, subject, html);
     }
 
+    /**
+     * Resend OTP to user
+     * @param {string} userId - User's ID
+     * @returns {Promise<Object>} OTP resend result
+     */
     async resendOTP(userId) {
         try {
             const user = await User.findByPk(userId);
@@ -134,6 +155,12 @@ class AuthService {
         }
     }
 
+    /**
+     * Verify user's OTP code
+     * @param {string} userId - User's ID
+     * @param {string} code - OTP code to verify
+     * @returns {Promise<Object>} Verification result
+     */
     async verifyOTP(userId, code) {
         try {
             Logger.info(`Verifying OTP for user: ${userId} with code: ${code}`); 
@@ -189,6 +216,11 @@ class AuthService {
         }
     }
 
+    /**
+     * Generate new OTP for user
+     * @param {string} userId - User's ID
+     * @returns {Promise<Object>} Generated OTP object
+     */
     async generateOTP(userId) {
         // Generate a secure random number and take first OTP_CONFIG.LENGTH digits
         const randomBytes = CryptoJS.lib.WordArray.random(32);
@@ -213,6 +245,12 @@ class AuthService {
         return sanitizedUser;
     }
 
+    /**
+     * Authenticate user login
+     * @param {string} email - User's email
+     * @param {string} password - User's password
+     * @returns {Promise<Object>} Login result with token
+     */
     async login(email, password) {
         try {
             if (!email || !password) {

@@ -3,6 +3,16 @@ const Logger = require('../config/logger-config');
 const { isCountryRestricted } = require('../config/restricted-countries');
 const { StatusCodes } = require('../types/response');
 
+/**
+ * IP Geolocation and Country Restriction Middleware
+ */
+
+/**
+ * Fetch geolocation data for an IP address
+ * @param {string} ip - IP address to lookup
+ * @returns {Promise<Object>} Geolocation data
+ * @throws {Error} When geolocation service fails
+ */
 const getGeoLocation = async (ip) => {
   try {
     Logger.debug(`Fetching geolocation for IP: ${ip}`);
@@ -31,6 +41,15 @@ const getGeoLocation = async (ip) => {
   }
 };
 
+/**
+ * Middleware to restrict access based on country
+ * Fetches user's geolocation and checks against restricted countries list
+ * 
+ * @middleware
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ */
 const countryRestrictionMiddleware = async (req, res, next) => {
   try {
     const ip = req.headers['x-real-ip'] || 

@@ -1,9 +1,37 @@
+/**
+ * Email Configuration Module
+ * @module MailConfig
+ * @description Handles email transport setup and email sending utilities
+ * 
+ * @requires nodemailer - Email sending library
+ * @requires crypto-js - Cryptographic functions
+ * @requires Logger - Application logging utility
+ */
 const nodemailer = require('nodemailer');
 const CryptoJS = require('crypto-js');
 const { Logger } = require('./index');
 
+/** @type {import('nodemailer').Transporter} */
 let transporter;
 
+/**
+ * Initialize Email Transport
+ * @description Sets up Gmail SMTP transport with authentication
+ * 
+ * Required Environment Variables:
+ * - SMTP_USER: Gmail email address
+ * - SMTP_PASS: Gmail app-specific password
+ * 
+ * Security Features:
+ * - TLS enabled
+ * - Connection verification
+ * - Error handling
+ * 
+ * @async
+ * @function initializeMailer
+ * @throws {Error} If mailer initialization fails
+ * @returns {Promise<void>}
+ */
 const initializeMailer = async () => {
   try {
     transporter = nodemailer.createTransport({
@@ -25,12 +53,42 @@ const initializeMailer = async () => {
   }
 };
 
+/**
+ * Generate Secure OTP
+ * @description Generates a cryptographically secure 6-digit OTP
+ * 
+ * Implementation Details:
+ * 1. Generates 4 random bytes using CryptoJS
+ * 2. Converts to hexadecimal string
+ * 3. Transforms to 6-digit number
+ * 4. Ensures leading zeros by adding 100000
+ * 
+ * @function generateOTP
+ * @returns {string} 6-digit OTP
+ */
 const generateOTP = () => {
   const randomBytes = CryptoJS.lib.WordArray.random(4);
   const number = parseInt(randomBytes.toString(), 16);
   return (number % 900000 + 100000).toString();
 };
 
+/**
+ * Send Email
+ * @description Sends an email using configured transport
+ * 
+ * Features:
+ * - Transport validation
+ * - Error handling
+ * - Success tracking
+ * - Logging
+ * 
+ * @async
+ * @function sendMail
+ * @param {string} to - Recipient email address
+ * @param {string} subject - Email subject
+ * @param {string} html - HTML content of email
+ * @returns {Promise<Object>} Send result with success status
+ */
 const sendMail = async (to, subject, html) => {
   try {
     if (!transporter) {
@@ -53,6 +111,27 @@ const sendMail = async (to, subject, html) => {
   }
 };
 
+/**
+ * Send OTP Email
+ * @description Sends verification email with OTP
+ * 
+ * Features:
+ * - Responsive HTML template
+ * - Development mode OTP exposure
+ * - Error handling
+ * 
+ * Template Features:
+ * - Mobile-friendly design
+ * - Clear typography
+ * - Security disclaimer
+ * - Expiry information
+ * 
+ * @async
+ * @function sendOTPEmail
+ * @param {string} to - Recipient email
+ * @param {string} userId - User identifier
+ * @returns {Promise<Object>} Send result with optional OTP in development
+ */
 const sendOTPEmail = async (to, userId) => {
   const otp = generateOTP();
   const subject = 'Your Verification Code';
